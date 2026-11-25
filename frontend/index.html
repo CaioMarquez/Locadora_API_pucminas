@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema Locadora de Veículos</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Menu superior simples vermelho -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-vermelho mb-4">
+    <div class="container">
+      <a class="navbar-brand" href="#" onclick="abrirSecao('fabricantes')">Locadora de Veículos</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="menuNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link active" href="#" data-tab="fabricantes" onclick="abrirSecao('fabricantes')">Fabricantes</a></li>
+          <li class="nav-item"><a class="nav-link" href="#" data-tab="veiculos" onclick="abrirSecao('veiculos')">Veículos</a></li>
+          <li class="nav-item"><a class="nav-link" href="#" data-tab="clientes" onclick="abrirSecao('clientes')">Clientes</a></li>
+          <li class="nav-item"><a class="nav-link" href="#" data-tab="alugueis" onclick="abrirSecao('alugueis')">Aluguéis</a></li>
+          <li class="nav-item"><a class="nav-link" href="#" data-tab="consultas" onclick="abrirSecao('consultas')">Consultas (Filtros)</a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-2">
+          <input type="text" id="urlApi" class="form-control form-control-sm" value="http://localhost:5084" style="width: 185px;" title="URL da API">
+          <button class="btn btn-sm btn-light" onclick="salvarUrlApi()">OK</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container pb-5">
+    <!-- Caixa de aviso simples -->
+    <div id="alerta" class="alert d-none" role="alert"></div>
+
+    <!-- ==================== FABRICANTES ==================== -->
+    <div id="sec-fabricantes" class="secao ativa">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4>Fabricantes</h4>
+        <button class="btn btn-vermelho btn-sm" onclick="novoFabricante()">+ Novo Fabricante</button>
+      </div>
+
+      <div class="box-filtro">
+        <div class="row g-2">
+          <div class="col-md-4">
+            <input type="text" id="fFabNome" class="form-control form-control-sm" placeholder="Filtrar por nome..." oninput="renderFabricantes()">
+          </div>
+          <div class="col-md-4">
+            <input type="text" id="fFabPais" class="form-control form-control-sm" placeholder="Filtrar por país..." oninput="renderFabricantes()">
+          </div>
+          <div class="col-md-2">
+            <select id="fFabAtivo" class="form-select form-select-sm" onchange="renderFabricantes()">
+              <option value="">Todos</option>
+              <option value="true">Ativo</option>
+              <option value="false">Inativo</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-outline-secondary btn-sm w-100" onclick="limparFiltroFab()">Limpar</button>
+          </div>
+        </div>
+      </div>
+
+      <table class="table table-bordered table-striped table-sm bg-white align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>País de Origem</th>
+            <th>Ativo</th>
+            <th>Veículos</th>
+            <th style="width: 140px;">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tbFabricantes"></tbody>
+      </table>
+    </div>
+
+    <!-- ==================== VEÍCULOS ==================== -->
+    <div id="sec-veiculos" class="secao">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4>Veículos</h4>
+        <button class="btn btn-vermelho btn-sm" onclick="novoVeiculo()">+ Novo Veículo</button>
+      </div>
+
+      <div class="box-filtro">
+        <div class="row g-2">
+          <div class="col-md-3">
+            <input type="text" id="fVeiPlaca" class="form-control form-control-sm" placeholder="Filtrar por placa..." oninput="renderVeiculos()">
+          </div>
+          <div class="col-md-3">
+            <input type="text" id="fVeiModelo" class="form-control form-control-sm" placeholder="Filtrar por modelo..." oninput="renderVeiculos()">
+          </div>
+          <div class="col-md-2">
+            <select id="fVeiFab" class="form-select form-select-sm" onchange="renderVeiculos()">
+              <option value="">Fabricante...</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <select id="fVeiStatus" class="form-select form-select-sm" onchange="renderVeiculos()">
+              <option value="">Status...</option>
+              <option value="Disponivel">Disponível</option>
+              <option value="Alugado">Alugado</option>
+              <option value="Manutencao">Manutenção</option>
+              <option value="Inativo">Inativo</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-outline-secondary btn-sm w-100" onclick="limparFiltroVei()">Limpar</button>
+          </div>
+        </div>
+      </div>
+
+      <table class="table table-bordered table-striped table-sm bg-white align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Placa</th>
+            <th>Modelo</th>
+            <th>Fabricante</th>
+            <th>Ano</th>
+            <th>KM</th>
+            <th>Status</th>
+            <th style="width: 140px;">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tbVeiculos"></tbody>
+      </table>
+    </div>
+
+    <!-- ==================== CLIENTES ==================== -->
+    <div id="sec-clientes" class="secao">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4>Clientes</h4>
+        <button class="btn btn-vermelho btn-sm" onclick="novoCliente()">+ Novo Cliente</button>
+      </div>
+
+      <div class="box-filtro">
+        <div class="row g-2">
+          <div class="col-md-4">
+            <input type="text" id="fCliNome" class="form-control form-control-sm" placeholder="Filtrar por nome..." oninput="renderClientes()">
+          </div>
+          <div class="col-md-3">
+            <input type="text" id="fCliCpf" class="form-control form-control-sm" placeholder="Filtrar por CPF..." oninput="renderClientes()">
+          </div>
+          <div class="col-md-3">
+            <input type="text" id="fCliEmail" class="form-control form-control-sm" placeholder="Filtrar por e-mail..." oninput="renderClientes()">
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-outline-secondary btn-sm w-100" onclick="limparFiltroCli()">Limpar</button>
+          </div>
+        </div>
+      </div>
+
+      <table class="table table-bordered table-striped table-sm bg-white align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>CPF</th>
+            <th>E-mail</th>
+            <th>Telefone</th>
+            <th>CNH</th>
+            <th style="width: 140px;">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tbClientes"></tbody>
+      </table>
+    </div>
+
+    <!-- ==================== ALUGUÉIS ==================== -->
+    <div id="sec-alugueis" class="secao">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4>Aluguéis</h4>
+        <button class="btn btn-vermelho btn-sm" onclick="novoAluguel()">+ Novo Aluguel</button>
+      </div>
+
+      <div class="box-filtro">
+        <div class="row g-2">
+          <div class="col-md-4">
+            <input type="text" id="fAluCli" class="form-control form-control-sm" placeholder="Filtrar por cliente..." oninput="renderAlugueis()">
+          </div>
+          <div class="col-md-3">
+            <input type="text" id="fAluVei" class="form-control form-control-sm" placeholder="Filtrar por placa/modelo..." oninput="renderAlugueis()">
+          </div>
+          <div class="col-md-3">
+            <select id="fAluStatus" class="form-select form-select-sm" onchange="renderAlugueis()">
+              <option value="">Todos os status</option>
+              <option value="Aberto">Aberto</option>
+              <option value="Finalizado">Finalizado</option>
+              <option value="Cancelado">Cancelado</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-outline-secondary btn-sm w-100" onclick="limparFiltroAlu()">Limpar</button>
+          </div>
+        </div>
+      </div>
+
+      <table class="table table-bordered table-striped table-sm bg-white align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>Veículo</th>
+            <th>Retirada</th>
+            <th>Prev. Devolução</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th style="width: 210px;">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tbAlugueis"></tbody>
+      </table>
+    </div>
+
+    <!-- ==================== CONSULTAS (ROTAS ETAPA 3) ==================== -->
+    <div id="sec-consultas" class="secao">
+      <h4 class="mb-3">Consultas do Banco (INNER JOIN e LEFT JOIN)</h4>
+
+      <!-- Consulta 1 -->
+      <div class="card mb-3">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <span>1. Veículos por Fabricante (INNER JOIN) — <code>/api/filtros/veiculos-por-fabricante</code></span>
+          <div class="d-flex gap-2">
+            <input type="text" id="c1Nome" class="form-control form-control-sm" placeholder="Ex: Toyota">
+            <button class="btn btn-vermelho btn-sm" onclick="buscarConsulta1()">Buscar</button>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          <table class="table table-sm table-bordered mb-0">
+            <thead><tr><th>ID</th><th>Placa</th><th>Modelo</th><th>Ano</th><th>Fabricante</th><th>Status</th></tr></thead>
+            <tbody id="tbC1"><tr><td colspan="6" class="text-center text-muted">Digite um fabricante e clique em Buscar.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Consulta 2 -->
+      <div class="card mb-3">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <span>2. Aluguéis por Período (INNER JOIN) — <code>/api/filtros/alugueis-por-periodo</code></span>
+          <div class="d-flex gap-2 align-items-center">
+            <input type="date" id="c2Inicio" class="form-control form-control-sm" value="2026-01-01">
+            <span>até</span>
+            <input type="date" id="c2Fim" class="form-control form-control-sm" value="2026-12-31">
+            <button class="btn btn-vermelho btn-sm" onclick="buscarConsulta2()">Buscar</button>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          <table class="table table-sm table-bordered mb-0">
+            <thead><tr><th>ID</th><th>Cliente</th><th>Veículo</th><th>Retirada</th><th>Prev. Devolução</th><th>Total</th></tr></thead>
+            <tbody id="tbC2"><tr><td colspan="6" class="text-center text-muted">Escolha as datas e clique em Buscar.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Consulta 3 -->
+      <div class="card mb-3">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+          <span>3. Clientes com Aluguel Ativo (INNER JOIN) — <code>/api/filtros/clientes-com-aluguel-ativo</code></span>
+          <button class="btn btn-outline-danger btn-sm" onclick="buscarConsulta3()">Atualizar</button>
+        </div>
+        <div class="card-body p-0">
+          <table class="table table-sm table-bordered mb-0">
+            <thead><tr><th>ID Cliente</th><th>Nome</th><th>Telefone</th><th>ID Aluguel</th><th>Retirada</th><th>Prev. Devolução</th></tr></thead>
+            <tbody id="tbC3"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Consulta 4 -->
+      <div class="card mb-3">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+          <span>4. Veículos Nunca Alugados (LEFT JOIN) — <code>/api/filtros/veiculos-sem-aluguel</code></span>
+          <button class="btn btn-outline-danger btn-sm" onclick="buscarConsulta4()">Atualizar</button>
+        </div>
+        <div class="card-body p-0">
+          <table class="table table-sm table-bordered mb-0">
+            <thead><tr><th>ID</th><th>Placa</th><th>Modelo</th><th>Ano</th><th>Status</th></tr></thead>
+            <tbody id="tbC4"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Consulta 5 -->
+      <div class="card mb-3">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+          <span>5. Total de Aluguéis por Cliente (LEFT JOIN + GROUP BY) — <code>/api/filtros/clientes-com-total-alugueis</code></span>
+          <button class="btn btn-outline-danger btn-sm" onclick="buscarConsulta5()">Atualizar</button>
+        </div>
+        <div class="card-body p-0">
+          <table class="table table-sm table-bordered mb-0">
+            <thead><tr><th>ID</th><th>Cliente</th><th>E-mail</th><th>Total de Aluguéis</th></tr></thead>
+            <tbody id="tbC5"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAIS ==================== -->
+  <!-- Modal Fabricante -->
+  <div class="modal fade" id="modalFab" tabindex="-1">
+    <div class="modal-dialog">
+      <form class="modal-content" onsubmit="salvarFabricante(event)">
+        <div class="modal-header bg-vermelho text-white">
+          <h6 class="modal-title" id="tituloModalFab">Fabricante</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="fabId">
+          <div class="mb-2">
+            <label class="form-label">Nome *</label>
+            <input type="text" id="fabNome" class="form-control form-control-sm" required minlength="2" maxlength="80">
+          </div>
+          <div class="mb-2">
+            <label class="form-label">País de Origem</label>
+            <input type="text" id="fabPais" class="form-control form-control-sm" maxlength="60">
+          </div>
+          <div class="form-check mt-2">
+            <input type="checkbox" id="fabAtivo" class="form-check-input" checked>
+            <label class="form-check-label" for="fabAtivo">Ativo</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-vermelho btn-sm">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Veículo -->
+  <div class="modal fade" id="modalVei" tabindex="-1">
+    <div class="modal-dialog">
+      <form class="modal-content" onsubmit="salvarVeiculo(event)">
+        <div class="modal-header bg-vermelho text-white">
+          <h6 class="modal-title" id="tituloModalVei">Veículo</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="veiId">
+          <div class="row g-2">
+            <div class="col-6">
+              <label class="form-label">Placa *</label>
+              <input type="text" id="veiPlaca" class="form-control form-control-sm" required minlength="7" maxlength="8">
+            </div>
+            <div class="col-6">
+              <label class="form-label">Modelo *</label>
+              <input type="text" id="veiModelo" class="form-control form-control-sm" required maxlength="80">
+            </div>
+            <div class="col-6">
+              <label class="form-label">Fabricante *</label>
+              <select id="veiFabricanteId" class="form-select form-select-sm" required></select>
+            </div>
+            <div class="col-3">
+              <label class="form-label">Ano *</label>
+              <input type="number" id="veiAno" class="form-control form-control-sm" required min="1950" max="2100">
+            </div>
+            <div class="col-3">
+              <label class="form-label">KM *</label>
+              <input type="number" id="veiKm" class="form-control form-control-sm" required min="0">
+            </div>
+            <div class="col-4">
+              <label class="form-label">Cor</label>
+              <input type="text" id="veiCor" class="form-control form-control-sm" maxlength="30">
+            </div>
+            <div class="col-4">
+              <label class="form-label">Chassi (17)</label>
+              <input type="text" id="veiChassi" class="form-control form-control-sm" minlength="17" maxlength="17">
+            </div>
+            <div class="col-4">
+              <label class="form-label">Status *</label>
+              <select id="veiStatus" class="form-select form-select-sm">
+                <option value="1">Disponível</option>
+                <option value="2">Alugado</option>
+                <option value="3">Manutenção</option>
+                <option value="4">Inativo</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-vermelho btn-sm">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Cliente -->
+  <div class="modal fade" id="modalCli" tabindex="-1">
+    <div class="modal-dialog">
+      <form class="modal-content" onsubmit="salvarCliente(event)">
+        <div class="modal-header bg-vermelho text-white">
+          <h6 class="modal-title" id="tituloModalCli">Cliente</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="cliId">
+          <div class="row g-2">
+            <div class="col-12">
+              <label class="form-label">Nome *</label>
+              <input type="text" id="cliNome" class="form-control form-control-sm" required minlength="2" maxlength="120">
+            </div>
+            <div class="col-6">
+              <label class="form-label">CPF (11 números) *</label>
+              <input type="text" id="cliCpf" class="form-control form-control-sm" required maxlength="14">
+            </div>
+            <div class="col-6">
+              <label class="form-label">E-mail *</label>
+              <input type="email" id="cliEmail" class="form-control form-control-sm" required maxlength="120">
+            </div>
+            <div class="col-4">
+              <label class="form-label">Telefone</label>
+              <input type="text" id="cliTel" class="form-control form-control-sm" maxlength="20">
+            </div>
+            <div class="col-4">
+              <label class="form-label">CNH</label>
+              <input type="text" id="cliCnh" class="form-control form-control-sm" maxlength="11">
+            </div>
+            <div class="col-4">
+              <label class="form-label">Nascimento</label>
+              <input type="date" id="cliNasc" class="form-control form-control-sm">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-vermelho btn-sm">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Aluguel -->
+  <div class="modal fade" id="modalAlu" tabindex="-1">
+    <div class="modal-dialog">
+      <form class="modal-content" onsubmit="salvarAluguel(event)">
+        <div class="modal-header bg-vermelho text-white">
+          <h6 class="modal-title" id="tituloModalAlu">Aluguel</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="aluId">
+          <div class="row g-2">
+            <div class="col-12">
+              <label class="form-label">Cliente *</label>
+              <select id="aluCliId" class="form-select form-select-sm" required></select>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Veículo *</label>
+              <select id="aluVeiId" class="form-select form-select-sm" required></select>
+            </div>
+            <div class="col-6">
+              <label class="form-label">Data Retirada *</label>
+              <input type="date" id="aluRetirada" class="form-control form-control-sm" required>
+            </div>
+            <div class="col-6">
+              <label class="form-label">Prev. Devolução *</label>
+              <input type="date" id="aluPrevista" class="form-control form-control-sm" required>
+            </div>
+            <div class="col-6">
+              <label class="form-label">KM Inicial *</label>
+              <input type="number" id="aluKm" class="form-control form-control-sm" required min="0">
+            </div>
+            <div class="col-6">
+              <label class="form-label">Valor Diária (R$) *</label>
+              <input type="number" id="aluDiaria" class="form-control form-control-sm" required min="0.01" step="0.01">
+            </div>
+            <div class="col-12">
+              <label class="form-label">Observações</label>
+              <input type="text" id="aluObs" class="form-control form-control-sm" maxlength="300">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-vermelho btn-sm">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Devolução -->
+  <div class="modal fade" id="modalDev" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+      <form class="modal-content" onsubmit="confirmarDevolucao(event)">
+        <div class="modal-header bg-vermelho text-white">
+          <h6 class="modal-title">Registrar Devolução</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="devId">
+          <div class="mb-2">
+            <label class="form-label">KM Final *</label>
+            <input type="number" id="devKm" class="form-control form-control-sm" required min="0">
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Data Devolução</label>
+            <input type="date" id="devData" class="form-control form-control-sm">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-success btn-sm">Confirmar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
